@@ -1,0 +1,38 @@
+{%- set metaTitle = (pageTitle + " · " + site.title) if pageTitle else site.title -%}
+{%- set metaDesc = pageDescription or site.description -%}
+{%- set metaUrl = site.url + page.url -%}
+{%- set metaImage = site.url + (pageImage or site.defaultImage) -%}
+
+<title>{{ metaTitle }}</title>
+<meta name="description" content="{{ metaDesc }}">
+
+{% if page.url and page.url != "/404.html" %}<link rel="canonical" href="{{ metaUrl }}">{% endif %}
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0b0e0c">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ metaTitle }}">
+<meta property="og:description" content="{{ metaDesc }}">
+<meta property="og:url" content="{{ metaUrl }}">
+<meta property="og:site_name" content="{{ site.title }}">
+<meta property="og:image" content="{{ metaImage }}">
+<meta property="og:locale" content="en_US">
+
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="{{ metaTitle }}">
+<meta name="twitter:description" content="{{ metaDesc }}">
+<meta name="twitter:image" content="{{ metaImage }}">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "{{ site.url }}/#org",
+  "name": {{ site.title | dump | safe }},
+  "url": "{{ site.url }}/",
+  "email": {{ site.email | dump | safe }},
+  "description": {{ site.description | dump | safe }},
+  "sameAs": {{ [site.social.github] | dump | safe }}
+}
+</script>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="21M Labs">
+  <rect width="64" height="64" rx="13" fill="#0b0e0c"/>
+  <text x="32" y="33" text-anchor="middle" dominant-baseline="central"
+        font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace"
+        font-size="23" font-weight="700" fill="#f7931a" letter-spacing="-1.5">21M</text>
+</svg>
