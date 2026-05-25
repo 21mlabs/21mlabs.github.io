@@ -1,0 +1,201 @@
+/* ── Tokens ───────────────────────────────── */
+:root {
+  --bg: #0b0e0c;
+  --fg: #e7ece1;
+  --dim: #6b7268;
+  --faint: #444b43;
+  --accent: #f7931a;       /* bitcoin orange — cursor + the only hover */
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, "Roboto Mono", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--bg); color: var(--fg); }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background:
+    radial-gradient(120% 90% at 50% -20%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 55%),
+    var(--bg);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.5rem, 5vh, 3rem) 0;
+}
+
+main { width: 100%; }
+
+/* ── The whole page ───────────────────────── */
+.screen {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.head { text-align: center; padding: 0 1.25rem; }
+
+.brand {
+  margin: 0;
+  font-size: clamp(1.9rem, 7.5vw, 3.1rem);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+}
+
+.line {
+  margin: 1rem 0 0;
+  color: var(--dim);
+  font-size: clamp(0.82rem, 2.6vw, 0.98rem);
+  letter-spacing: 0.14em;
+}
+
+/* ── The chain ────────────────────────────────
+   A horizontal strip of block cards. The latest sits centered; older blocks
+   trail off toward genesis, fading with distance. It auto-drifts back through
+   history and can be dragged. Cards are positioned by chaintip.js via
+   transforms (no reflow), and the strip is windowed so the DOM stays small.   */
+.chain {
+  position: relative;
+  width: 100%;
+  height: 234px;
+  margin: clamp(2rem, 7vh, 4rem) 0;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: pan-y;                 /* horizontal = chain, vertical = page scroll */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;         /* no long-press menu mid-drag */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+}
+.chain.dragging { cursor: grabbing; }
+
+.hint {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  height: 1.2em;
+  text-align: center;
+  color: var(--faint);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+}
+
+/* A single block — a minimal, ASCII take on a mempool block tile */
+.card {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: var(--card-w, 150px);
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+.card .num {                               /* block number, above the tile */
+  position: absolute;
+  bottom: calc(100% + 0.45rem);
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  color: var(--accent);                    /* bitcoin orange */
+  text-decoration: none;
+  text-underline-offset: 3px;
+}
+.card a.num:hover { text-decoration: underline; }   /* underline hugs the text */
+
+.card .box {                        /* gofmt-style: keys col 1, values col 2 */
+  border: 1px solid var(--faint);
+  background: var(--bg);
+  padding: 0.55rem 0.65rem;
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: 0.6em;
+  row-gap: 0.16rem;
+  text-align: left;
+  font-size: 0.58rem;
+  letter-spacing: 0.01em;
+}
+.card.is-center .box { border-color: var(--dim); }
+.card.is-tip .box {                 /* the chain tip — the live, special block */
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 38%, transparent),
+              0 0 20px -7px var(--accent);
+  transition: box-shadow 0.7s ease;   /* chaintip.js drives a random, arrhythmic glow */
+}
+.card .stat { display: contents; }  /* let .k/.v join the box grid */
+.card .k { color: var(--fg); }      /* key/title — highlighted */
+.card .v { color: var(--dim); white-space: nowrap; }   /* value — quieter */
+
+.card .hash {                              /* untitled; leading zeros = difficulty */
+  grid-column: 1 / -1;
+  margin-top: 0.3rem;
+  padding-top: 0.4rem;
+  border-top: 1px dashed var(--faint);
+  font-size: 0.52rem;
+  letter-spacing: 0;
+  line-height: 1.45;
+  color: var(--dim);
+  text-align: left;
+  word-break: break-all;                   /* wrap the whole hash */
+}
+.card .hash .z { color: var(--faint); }    /* the starting zeros, lighter */
+
+/* prev → this : the older block's hash feeds this one.
+   A dashed terminal connector ( ▪ ▪ ▪ ▶ ) with a triangle head. */
+.card .arrow {
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  width: calc(var(--pitch, 210px) - var(--card-w, 150px));
+  display: flex;
+  align-items: center;
+  color: var(--dim);
+  transform: translateY(-50%);
+}
+.card.no-prev .arrow { display: none; }
+.card .arrow::before {
+  content: "";
+  flex: 1 1 auto;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, currentColor 0 4px, transparent 4px 8px);
+}
+.card .arrow::after {
+  content: "\25B6";                        /* ▶ */
+  font-size: 12px;
+  line-height: 1;
+  margin-left: 1px;
+}
+
+/* ── Contact ──────────────────────────────── */
+.contact {
+  text-align: center;
+  padding: 0 1.25rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+}
+.contact a {
+  color: var(--dim);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+.contact a:hover {
+  color: var(--accent);
+  border-bottom-color: color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card.is-tip .box { transition: none; }   /* JS glow is skipped; static only */
+}
